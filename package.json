@@ -7,5 +7,12 @@
   "private": true,
   "dependencies": {
     "phaser": "^3.22.0"
+  },
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "build": "parcel src/index.html"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
   }
 }
