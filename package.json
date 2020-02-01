@@ -1,0 +1,11 @@
+{
+  "name": "hackathon",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Anthony Villena <unremarkableSCM@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "phaser": "^3.22.0"
+  }
+}
