@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import playerImage from './player.png'
 
 const config = {
   type: Phaser.AUTO,
@@ -13,9 +14,17 @@ const config = {
 
 const game = new Phaser.Game(config);
 function preload() {
-  // this.load.image("logo", logoImg);
+  this.load.image('player', playerImage)
 }
 
 function create() {
-  // const logo = this.add.image(400, 150, "logo");
+  // const playerImage = this.add.image(400, 150, 'player');
+  const player = this.add.sprite(100, 100, 'player')
+
+  this.input.keyboard.on('keydown_A', (event) => {
+    player.x -= 10
+  })
+  this.input.keyboard.on('keydown_D', (event) => {
+    player.x += 10
+  })
 }
