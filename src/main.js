@@ -25,7 +25,7 @@ function create() {
   const tiles = map.addTilesetImage('tiles')
 
   const background = this.add.image(0, 0, 'background')
-  background.setScale(3)
+  background.setScale(6)
 
   const groundLayer = map.createDynamicLayer('ground', tiles)
   groundLayer.setCollisionByExclusion([-1])
@@ -112,9 +112,14 @@ function create() {
 
   // TODO: Place mobs in right places
   mobs = this.physics.add.group()
-  for (let x = 300; x <= 512; x += 100) {
+  for (let x = 300; x <= 412; x += 100) {
     const mob = mobs.create(x, 100, 'tiles')
-    // mob.setCollideWorldBounds(true) // TODO: Doesn't work after grouping?
+    this.physics.add.collider(groundLayer, mob)
+    mob.direction = -1 // custom property
+    mobs.add(mob)
+  }
+  for (let x = 768; x <= 968; x += 200) {
+    const mob = mobs.create(x, 100, 'tiles')
     this.physics.add.collider(groundLayer, mob)
     mob.direction = -1 // custom property
     mobs.add(mob)
