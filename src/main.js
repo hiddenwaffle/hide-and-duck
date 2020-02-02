@@ -9,6 +9,7 @@ let obstructed = false
 let hidden = false
 let mobOverlap = false
 let completed = false
+let caughtTimer = -1
 
 function preload() {
   this.load.tilemapTiledJSON('map', tempJson)
@@ -104,35 +105,43 @@ function create() {
 }
 
 function update(time, delta) {
-  if (cursors.down.isDown && player.body.onFloor()) {
-    player.setVelocity(0)
-    player.anims.play('duck', true)
-    if (obstructed) {
-      hidden = true
+  if (caughtTimer > 0) {
+    caughtTimer -= delta
+    if (caughtTimer <= 0) {
+      caughtTimer = -1
+      player.x = 100
+      player.y = 100
     }
   } else {
-    if (cursors.left.isDown) {
-      player.setVelocityX(-8 * delta)
-      player.anims.play('left', true)
-    } else if (cursors.right.isDown) {
-      player.setVelocityX(8 * delta)
-      player.anims.play('right', true)
+    if (cursors.down.isDown && player.body.onFloor()) {
+      player.setVelocity(0)
+      player.anims.play('duck', true)
+      if (obstructed) {
+        hidden = true
+      }
     } else {
-      player.setVelocityX(0)
-      player.anims.play('stand')
-    }
-    if (cursors.up.isDown && player.body.onFloor()) {
-      player.setVelocityY(-250)
+      if (cursors.left.isDown) {
+        player.setVelocityX(-8 * delta)
+        player.anims.play('left', true)
+      } else if (cursors.right.isDown) {
+        player.setVelocityX(8 * delta)
+        player.anims.play('right', true)
+      } else {
+        player.setVelocityX(0)
+        player.anims.play('stand')
+      }
+      if (cursors.up.isDown && player.body.onFloor()) {
+        player.setVelocityY(-250)
+      }
     }
   }
   // TODO:
   // https://stackoverflow.com/questions/51029337/create-a-parallax-auto-scroll-background-in-phaser-3
 
   if (mobOverlap && !hidden) {
-    console.log('caught')
-    player.x = 100
-    player.y = 100
     player.setVelocity(0)
+    player.anims.play('caught', true)
+    caughtTimer = 30
   }
 
   mobs.children.iterate((mob) => {
