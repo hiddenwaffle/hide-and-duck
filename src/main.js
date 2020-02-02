@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import tilesImage from './tiles.png'
 import tempJson from './temp.json'
+import backgroundImage from './background.jpg'
 
 let player = null
 let mobs = null
@@ -16,11 +17,15 @@ let completedText = null
 function preload() {
   this.load.tilemapTiledJSON('map', tempJson)
   this.load.spritesheet('tiles', tilesImage, { frameWidth: 48, frameHeight: 48 });
+  this.load.image('background', backgroundImage)
 }
 
 function create() {
   const map = this.make.tilemap({key: 'map'})
   const tiles = map.addTilesetImage('tiles')
+
+  const background = this.add.image(0, 0, 'background')
+  background.setScale(20)
 
   const groundLayer = map.createDynamicLayer('ground', tiles)
   groundLayer.setCollisionByExclusion([-1])
