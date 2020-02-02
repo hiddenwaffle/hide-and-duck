@@ -1,16 +1,19 @@
 import Phaser from 'phaser'
 import playerImage from './player.png'
+import tilesImage from './tiles.png'
+import tempJson from './temp.json'
 
 function preload() {
   this.load.image('player', playerImage)
-  this.load.tilemapTiledJSON('map', 'map.json')
-  this.load.spritesheet('tiles', 'tiles.png', { frameWidth: 48, frameHeight: 48 });
+  this.load.tilemapTiledJSON('map', tempJson)
+  this.load.spritesheet('tiles', tilesImage, { frameWidth: 48, frameHeight: 48 });
 }
 
 function create() {
   const map = this.make.tilemap({key: 'map'})
   const groundTiles = map.addTilesetImage('tiles')
-  const groundLayer = map.createDynamicLayer('world', groundTiles, 0, 0)
+  const groundLayer = map.createDynamicLayer('world', groundTiles)
+  if (!groundLayer) throw ''
   groundLayer.setCollisionByExclusion([-1])
   this.physics.world.bounds.width = groundLayer.width
   this.physics.world.bounds.height = groundLayer.height
