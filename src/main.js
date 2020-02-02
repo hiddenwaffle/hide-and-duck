@@ -3,7 +3,7 @@ import tilesImage from './tiles.png'
 import tempJson from './temp.json'
 
 let player = null
-const mobs = []
+let mobs = null
 let cursors = null
 let obstructed = false
 let hidden = false
@@ -84,12 +84,13 @@ function create() {
   })
 
   // TODO: Place mobs in right places
+  mobs = this.physics.add.group()
   for (let x = 300; x <= 512; x += 100) {
-    const mob = this.physics.add.sprite(x, 100, 'tiles')
-    mob.setCollideWorldBounds(true)
+    const mob = mobs.create(x, 100, 'tiles')
+    // mob.setCollideWorldBounds(true) // TODO: Doesn't work after grouping?
     this.physics.add.collider(groundLayer, mob)
     mob.direction = -1 // custom property
-    mobs.push(mob)
+    mobs.add(mob)
   }
 
   this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
@@ -124,7 +125,7 @@ function update(time, delta) {
   // TODO:
   // https://stackoverflow.com/questions/51029337/create-a-parallax-auto-scroll-background-in-phaser-3
 
-  for (let mob of mobs) {
+  mobs.children.iterate((mob) => {
     // Patrol back and forth
     if (mob.body.onFloor()) {
       if (mob.body.blocked.left || mob.body.blocked.right) {
@@ -133,7 +134,7 @@ function update(time, delta) {
       mob.setVelocityX(mob.direction * 8 * delta)
       mob.anims.play('mobLeft', true)
     }
-  }
+  })
 
   // Reset variables for next loop
   obstructed = false
