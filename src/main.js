@@ -3,6 +3,7 @@ import tilesImage from './tiles.png'
 import tempJson from './temp.json'
 
 let player = null
+const mobs = []
 let cursors = null
 let obstructed = false
 let hidden = false
@@ -58,6 +59,18 @@ function create() {
     repeat: -1
   })
   this.anims.create({
+    key: 'duck',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [10]}),
+    frameRate: 1,
+    repeat: -1
+  })
+  this.anims.create({
+    key: 'caught',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [3]}),
+    frameRate: 1,
+    repeat: -1
+  })
+  this.anims.create({
     key: 'mobLeft',
     frames: this.anims.generateFrameNumbers('tiles', { frames: [4, 5]}),
     frameRate: 6,
@@ -70,6 +83,15 @@ function create() {
     repeat: -1
   })
 
+  // TODO: Place mobs in right places
+  for (let x = 300; x <= 512; x += 100) {
+    const mob = this.physics.add.sprite(x, 100, 'tiles')
+    mob.setCollideWorldBounds(true)
+    this.physics.add.collider(groundLayer, mob)
+    mob.direction = -1 // custom property
+    mobs.push(mob)
+  }
+
   this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
   this.cameras.main.startFollow(player)
   this.cameras.main.roundPixels = true
@@ -80,7 +102,7 @@ function create() {
 function update(time, delta) {
   if (cursors.down.isDown && player.body.onFloor()) {
     player.setVelocity(0)
-    // TODO
+    player.anims.play('duck', true)
     if (obstructed) {
       hidden = true
     }
@@ -102,8 +124,15 @@ function update(time, delta) {
   // TODO:
   // https://stackoverflow.com/questions/51029337/create-a-parallax-auto-scroll-background-in-phaser-3
 
-  if (hidden) {
-    console.log('hiding!')
+  for (let mob of mobs) {
+    // Patrol back and forth
+    if (mob.body.onFloor()) {
+      if (mob.body.blocked.left || mob.body.blocked.right) {
+        mob.direction *= -1
+      }
+      mob.setVelocityX(mob.direction * 8 * delta)
+      mob.anims.play('mobLeft', true)
+    }
   }
 
   // Reset variables for next loop
