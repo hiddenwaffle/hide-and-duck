@@ -1,32 +1,93 @@
 import Phaser from 'phaser'
-import playerImage from './player.png'
 import tilesImage from './tiles.png'
 import tempJson from './temp.json'
 
+let player = null
+let cursors = null
+
 function preload() {
-  this.load.image('player', playerImage)
   this.load.tilemapTiledJSON('map', tempJson)
   this.load.spritesheet('tiles', tilesImage, { frameWidth: 48, frameHeight: 48 });
 }
 
 function create() {
   const map = this.make.tilemap({key: 'map'})
-  const groundTiles = map.addTilesetImage('tiles')
-  const groundLayer = map.createDynamicLayer('world', groundTiles)
-  if (!groundLayer) throw ''
+  const tiles = map.addTilesetImage('tiles')
+
+  const groundLayer = map.createDynamicLayer('ground', tiles)
   groundLayer.setCollisionByExclusion([-1])
   this.physics.world.bounds.width = groundLayer.width
   this.physics.world.bounds.height = groundLayer.height
 
-  // const playerImage = this.add.image(400, 150, 'player');
-  const player = this.add.sprite(100, 100, 'player')
+  const doorLayer = map.createStaticLayer('door', tiles)
+  // Continued after player initialization...
 
-  this.input.keyboard.on('keydown_A', (event) => {
-    player.x -= 10
+  player = this.physics.add.sprite(100, 100, 'tiles')
+  player.setCollideWorldBounds(true)
+  this.physics.add.collider(groundLayer, player)
+
+  // ...continued from before player initialization
+  // I think the indices starts at 1 instead of 0?
+  doorLayer.setTileIndexCallback(9, activeDoor, this)
+  this.physics.add.overlap(player, doorLayer)
+
+  const obstructionsLayer = map.createStaticLayer('obstructions', tiles)
+  // I think the indices starts at 1 instead of 0?
+  obstructionsLayer.setTileIndexCallback(7, activeObstruction, this)
+  obstructionsLayer.setTileIndexCallback(8, activeObstruction, this)
+  this.physics.add.overlap(player, obstructionsLayer)
+
+  this.anims.create({
+    key: 'stand',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [0]}),
+    frameRate: 1000,
+    repeat: -1
   })
-  this.input.keyboard.on('keydown_D', (event) => {
-    player.x += 10
+  this.anims.create({
+    key: 'left',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [1, 2]}),
+    frameRate: 10,
+    repeat: -1
   })
+  this.anims.create({
+    key: 'right',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [1, 2]}),
+    frameRate: 10,
+    repeat: -1
+  })
+
+  this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
+  this.cameras.main.startFollow(player)
+  this.cameras.main.roundPixels = true
+
+  cursors = this.input.keyboard.createCursorKeys()
+}
+
+function update(time, delta) {
+  if (cursors.left.isDown) {
+    player.setVelocityX(-8 * delta)
+    player.anims.play('left', true)
+  } else if (cursors.right.isDown) {
+    player.setVelocityX(8 * delta)
+    player.anims.play('right', true)
+  } else {
+    player.setVelocityX(0)
+    player.anims.play('stand')
+  }
+  if (cursors.up.isDown && player.body.onFloor()) {
+    player.setVelocityY(-250)
+  }
+
+  // TODO:
+  // https://stackoverflow.com/questions/51029337/create-a-parallax-auto-scroll-background-in-phaser-3
+}
+
+function activeObstruction(sprite, tile) {
+  console.log(sprite.x, sprite.y, '-', tile.pixelX, tile.pixelY)
+}
+
+function activeDoor(sprite, tile) {
+  console.log('door')
 }
 
 const config = {
@@ -36,7 +97,8 @@ const config = {
   height: 384,
   scene: {
     preload: preload,
-    create: create
+    create: create,
+    update: update
   },
   physics: {
     default: 'arcade',
