@@ -10,6 +10,8 @@ let hidden = false
 let mobOverlap = false
 let completed = false
 let caughtTimer = -1
+let caughtText = null
+let completedText = null
 
 function preload() {
   this.load.tilemapTiledJSON('map', tempJson)
@@ -42,6 +44,23 @@ function create() {
   obstructionsLayer.setTileIndexCallback(7, activeObstruction, this)
   obstructionsLayer.setTileIndexCallback(8, activeObstruction, this)
   this.physics.add.overlap(player, obstructionsLayer)
+
+  // Caught Condition Text
+  caughtText = this.add.text(0, 0, 'CAUGHT', {
+    font: '72px Arial Black',
+    fill: '#fff'
+  })
+  caughtText.setStroke('#f00', 16);
+  caughtText.setShadow(2, 2, '#333333', 2, true, true)
+  caughtText.visible = false
+  // Completed Condition Text
+  completedText = this.add.text(0, 0, 'SUCCESS', {
+    font: '74px Arial Black',
+    fill: '#fff'
+  })
+  completedText.setStroke('#00f', 16);
+  completedText.setShadow(2, 2, '#333333', 2, true, true)
+  completedText.visible = false
 
   this.anims.create({
     key: 'stand',
@@ -109,6 +128,7 @@ function update(time, delta) {
     caughtTimer -= delta
     if (caughtTimer <= 0) {
       caughtTimer = -1
+      caughtText.visible = false
       player.x = 100
       player.y = 100
     }
@@ -141,7 +161,10 @@ function update(time, delta) {
   if (mobOverlap && !hidden) {
     player.setVelocity(0)
     player.anims.play('caught', true)
-    caughtTimer = 30
+    caughtTimer = 45
+    caughtText.x = player.x - 150
+    caughtText.y = player.y - 96
+    caughtText.visible = true
   }
 
   mobs.children.iterate((mob) => {
@@ -170,13 +193,9 @@ function activeObstruction(sprite, tile) {
 
 function activeDoor(sprite, tile) {
   if (!completed) {
-    // Win Condition Text
-    const completedText = this.add.text(player.x - 150, player.y - 96, 'SUCCESS', {
-      font: '74px Arial Black',
-      fill: '#fff'
-    })
-    completedText.setStroke('#00f', 16);
-    completedText.setShadow(2, 2, '#333333', 2, true, true)
+    completedText.x = player.x - 150
+    completedText.y = player.y - 96
+    completedText.visible = true
   }
   completed = true
 }
