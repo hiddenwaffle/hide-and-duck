@@ -4,6 +4,8 @@ import tempJson from './temp.json'
 
 let player = null
 let cursors = null
+let obstructed = false
+let hidden = false
 
 function preload() {
   this.load.tilemapTiledJSON('map', tempJson)
@@ -40,19 +42,31 @@ function create() {
   this.anims.create({
     key: 'stand',
     frames: this.anims.generateFrameNumbers('tiles', { frames: [0]}),
-    frameRate: 1000,
+    frameRate: 1,
     repeat: -1
   })
   this.anims.create({
     key: 'left',
     frames: this.anims.generateFrameNumbers('tiles', { frames: [1, 2]}),
-    frameRate: 10,
+    frameRate: 6,
     repeat: -1
   })
   this.anims.create({
     key: 'right',
     frames: this.anims.generateFrameNumbers('tiles', { frames: [1, 2]}),
-    frameRate: 10,
+    frameRate: 6,
+    repeat: -1
+  })
+  this.anims.create({
+    key: 'mobLeft',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [4, 5]}),
+    frameRate: 6,
+    repeat: -1
+  })
+  this.anims.create({
+    key: 'mobRight',
+    frames: this.anims.generateFrameNumbers('tiles', { frames: [4, 5]}),
+    frameRate: 6,
     repeat: -1
   })
 
@@ -64,26 +78,44 @@ function create() {
 }
 
 function update(time, delta) {
-  if (cursors.left.isDown) {
-    player.setVelocityX(-8 * delta)
-    player.anims.play('left', true)
-  } else if (cursors.right.isDown) {
-    player.setVelocityX(8 * delta)
-    player.anims.play('right', true)
+  if (cursors.down.isDown && player.body.onFloor()) {
+    player.setVelocity(0)
+    // TODO
+    if (obstructed) {
+      hidden = true
+    }
   } else {
-    player.setVelocityX(0)
-    player.anims.play('stand')
+    if (cursors.left.isDown) {
+      player.setVelocityX(-8 * delta)
+      player.anims.play('left', true)
+    } else if (cursors.right.isDown) {
+      player.setVelocityX(8 * delta)
+      player.anims.play('right', true)
+    } else {
+      player.setVelocityX(0)
+      player.anims.play('stand')
+    }
+    if (cursors.up.isDown && player.body.onFloor()) {
+      player.setVelocityY(-250)
+    }
   }
-  if (cursors.up.isDown && player.body.onFloor()) {
-    player.setVelocityY(-250)
-  }
-
   // TODO:
   // https://stackoverflow.com/questions/51029337/create-a-parallax-auto-scroll-background-in-phaser-3
+
+  if (hidden) {
+    console.log('hiding!')
+  }
+
+  // Reset variables for next loop
+  obstructed = false
+  hidden = false
 }
 
 function activeObstruction(sprite, tile) {
-  console.log(sprite.x, sprite.y, '-', tile.pixelX, tile.pixelY)
+  const diff = tile.pixelX - sprite.x
+  if (diff > -48 && diff < 0) {
+    obstructed = true
+  }
 }
 
 function activeDoor(sprite, tile) {
