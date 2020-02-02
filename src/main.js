@@ -7,6 +7,8 @@ let mobs = null
 let cursors = null
 let obstructed = false
 let hidden = false
+let mobOverlap = false
+let completed = false
 
 function preload() {
   this.load.tilemapTiledJSON('map', tempJson)
@@ -92,6 +94,7 @@ function create() {
     mob.direction = -1 // custom property
     mobs.add(mob)
   }
+  this.physics.add.overlap(player, mobs, activeMob, null, this)
 
   this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
   this.cameras.main.startFollow(player)
@@ -125,6 +128,13 @@ function update(time, delta) {
   // TODO:
   // https://stackoverflow.com/questions/51029337/create-a-parallax-auto-scroll-background-in-phaser-3
 
+  if (mobOverlap && !hidden) {
+    console.log('caught')
+    player.x = 100
+    player.y = 100
+    player.setVelocity(0)
+  }
+
   mobs.children.iterate((mob) => {
     // Patrol back and forth
     if (mob.body.onFloor()) {
@@ -139,6 +149,7 @@ function update(time, delta) {
   // Reset variables for next loop
   obstructed = false
   hidden = false
+  mobOverlap = false
 }
 
 function activeObstruction(sprite, tile) {
@@ -149,7 +160,20 @@ function activeObstruction(sprite, tile) {
 }
 
 function activeDoor(sprite, tile) {
-  console.log('door')
+  if (!completed) {
+    // Win Condition Text
+    const completedText = this.add.text(player.x - 150, player.y - 96, 'SUCCESS', {
+      font: '74px Arial Black',
+      fill: '#fff'
+    })
+    completedText.setStroke('#00f', 16);
+    completedText.setShadow(2, 2, '#333333', 2, true, true)
+  }
+  completed = true
+}
+
+function activeMob(sprite, tile) {
+  mobOverlap = true
 }
 
 const config = {
